@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>词汇测验</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0; font-family: "Noto Sans SC", sans-serif;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; height: 100vh;
+      transition: background-color 0.3s ease;
+    }
+    .card {
+      font-size: 100px; margin-bottom: 40px;
+    }
+    button {
+      font-size: 24px; padding: 10px 30px;
+      margin: 10px; border: none; border-radius: 8px;
+      cursor: pointer;
+    }
+    .correct { background-color: #4CAF50; color: white; }
+    .incorrect { background-color: #f44336; color: white; }
+    .restart-btn {
+      font-size: 20px;
+      background: #333; color: #fff;
+      padding: 10px 20px; border-radius: 6px;
+      margin-top: 30px;
+    }
+    .result {
+      font-size: 28px; text-align: center;
+      max-width: 90vw;
+    }
+    .wrong-list {
+      margin-top: 20px;
+      color: red;
+      font-size: 20px;
+    }
+    .range-selection {
+      font-size: 20px;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="card" id="word">开始</div>
+<div>
+  <button onclick="startListening()">🎤 开始朗读</button>
+</div>
+<div class="result" id="result" style="display:none;"></div>
+<button class="restart-btn" onclick="restart()">重新开始</button>
+<button class="range-selection" onclick="selectRange()">选择词汇范围</button>
+
+<script>
+  const originalWords = [
+    "一","二","三","四","五","六","七","八","九","十","百","千","万",
+"你","我","他","她","它","我们","你们","他们","她们","它们",
+"这","那","哪里","什么","为什么","怎么",
+"是","不是","有","没有",
+"好","坏","大","小","多","少","高","低","远","近","长","短","新","旧","热","冷","早","晚",
+"人","家","学校","老师","学生","书","车","纸","笔","水","朋友",
+"爸爸","妈妈","哥哥","姐姐","弟弟","妹妹",
+"太阳","月亮","星星","鸟","猫","狗","花","树","房子","桌子","椅子","门","窗",
+"电","电视","手机","电脑","音乐",
+"食物","饭","面","菜","水果","蔬菜",
+"书包","伞","鞋",
+"头发","眼睛","鼻子","耳朵","嘴巴","手",
+"吃","喝","走","说","看","写","读","玩","跳","听","买","卖","休息","打","开","关","回","帮","教","做"];
+
+  let words = [];
+  let current = 0;
+  let correct = 0;
+  let wrong = 0;
+  let wrongWords = [];
+
+  const wordDiv = document.getElementById('word');
+  const resultDiv = document.getElementById('result');
+
+  let selectedRange = [];
+
+  function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  function showWord() {
+  if (words[current]) {
+    wordDiv.innerText = words[current];
+  } else {
+    wordDiv.innerText = "请选择词汇范围";
+  }
+  document.body.style.backgroundColor = "white";
+  }
+
+  function markAnswer(isCorrect) {
+    if (isCorrect) {
+      correct++;
+      document.body.style.backgroundColor = "#c8f7c5";
+    } else {
+      wrong++;
+      wrongWords.push(words[current]);
+      document.body.style.backgroundColor = "#f8c6c6";
+    }
+
+    setTimeout(() => {
+      current++;
+      if (current < words.length) {
+        showWord();
+      } else {
+        wordDiv.innerText = "🎊";
+        resultDiv.style.display = "block";
+        let wrongListHTML = wrongWords.length > 0
+          ? `<div class="wrong-list">❌ 答错的词汇：${wrongWords.join('，')}</div>`
+          : '';
+        resultDiv.innerHTML = `
+          总共 ${words.length} 个词<br>
+          ✅️ ：${correct} 个<br>
+          ❌ ：${wrong} 个
+          ${wrongListHTML}
+        `;
+      }
+    }, 500);
+  }
+
+  function restart() {
+    words = shuffle([...selectedRange]); // 洗牌选定范围的词汇
+    current = 0;
+    correct = 0;
+    wrong = 0;
+    wrongWords = [];
+    resultDiv.style.display = "none";
+    showWord();
+  }
+
+  function selectRange() {
+
+  const startWord = prompt("请输入开始的词汇（例如：一）:");
+  const endWord = prompt("请输入结束的词汇（例如：学校）:");
+
+  const startIndex = originalWords.indexOf(startWord);
+  const endIndex = originalWords.indexOf(endWord);
+
+  if (startIndex === -1 || endIndex === -1 || startIndex > endIndex) {
+    alert("无效的输入");
+    return;
+  }
+
+  selectedRange = originalWords.slice(startIndex, endIndex + 1);
+  restart();
+}
+
+
+// ==========================
+// 加入这里 👇
+// ==========================
+
+let recognition;
+
+function startListening(){
+
+  alert("开始听，请读：" + words[current]);
+
+
+  const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+
+  if (!SpeechRecognition){
+    alert("浏览器不支持语音识别");
+    return;
+  }
+
+
+  let recognition = new SpeechRecognition();
+
+
+  recognition.lang = "zh-CN";
+
+  recognition.continuous = false;
+
+  recognition.interimResults = false;
+
+
+  recognition.start();
+
+
+  recognition.onstart = function(){
+
+    console.log("语音开始");
+
+  };
+
+
+  recognition.onresult = function(event){
+
+
+    let result =
+    event.results[0][0].transcript;
+
+
+    alert("听到：" + result);
+
+
+    let answer = words[current];
+
+
+    if(result.trim() == answer){
+
+        markAnswer(true);
+
+    }else{
+
+        markAnswer(false);
+
+    }
+
+
+  };
+
+
+  recognition.onerror = function(event){
+
+    alert("错误：" + event.error);
+
+  };
+
+
+  recognition.onend = function(){
+
+    console.log("结束");
+
+  };
+
+
+}
+
+
+// 初次载入页面时
+restart();
+</script>
+</body>
+</html>
