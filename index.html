@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Moon AI 汉字朗读 V6</title>
+<title>Moon AI 汉字朗读 V6.1</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -19,6 +19,7 @@ body{
     justify-content:center;
     align-items:center;
     font-family:"Microsoft YaHei";
+    transition:0.3s;
 }
 
 
@@ -36,7 +37,7 @@ body{
 
 button{
 
-    font-size:24px;
+    font-size:22px;
     padding:15px 30px;
     margin:8px;
     border:none;
@@ -85,8 +86,21 @@ audio{
 }
 
 
-</style>
+.correct{
 
+    background:#c8f7c5;
+
+}
+
+
+.wrong{
+
+    background:#ffcdd2;
+
+}
+
+
+</style>
 
 </head>
 
@@ -94,41 +108,45 @@ audio{
 <body>
 
 
-
-<div class="word" id="word">
-</div>
+<div class="word" id="word"></div>
 
 
-<div class="pinyin" id="pinyin">
-</div>
+<div class="pinyin" id="pinyin"></div>
 
 
 
 <button class="start" onclick="startRecording()">
+
 🎤 开始朗读
+
 </button>
 
 
 
 <button class="stop" onclick="stopRecording()">
+
 ⏹ 结束朗读
+
 </button>
 
 
 
 <button class="submit" onclick="submitAnswer()">
+
 📤 提交判断
+
 </button>
 
 
 
 <div class="result" id="result">
+
 等待开始
+
 </div>
 
 
 <div id="audioArea"></div>
-
 
 
 
@@ -180,19 +198,19 @@ let stream=null;
 
 
 
-const wordDiv =
+const wordDiv=
 document.getElementById("word");
 
 
-const pinyinDiv =
+const pinyinDiv=
 document.getElementById("pinyin");
 
 
-const resultDiv =
+const resultDiv=
 document.getElementById("result");
 
 
-const audioArea =
+const audioArea=
 document.getElementById("audioArea");
 
 
@@ -202,15 +220,15 @@ document.getElementById("audioArea");
 function showWord(){
 
 
-wordDiv.innerHTML =
+wordDiv.innerHTML=
 words[current].word;
 
 
-pinyinDiv.innerHTML =
+pinyinDiv.innerHTML=
 words[current].pinyin;
 
 
-resultDiv.innerHTML =
+resultDiv.innerHTML=
 "等待朗读";
 
 
@@ -220,7 +238,12 @@ audioArea.innerHTML="";
 audioBlob=null;
 
 
+document.body.className="";
+
+
 }
+
+
 
 
 
@@ -251,14 +274,15 @@ new MediaRecorder(stream);
 
 
 
-mediaRecorder.ondataavailable=function(event){
+mediaRecorder.ondataavailable=function(e){
 
 
-if(event.data.size>0){
+if(e.data.size>0){
 
-audioChunks.push(event.data);
+audioChunks.push(e.data);
 
 }
+
 
 };
 
@@ -267,7 +291,6 @@ audioChunks.push(event.data);
 
 
 mediaRecorder.onstop=function(){
-
 
 
 audioBlob =
@@ -286,6 +309,7 @@ URL.createObjectURL(audioBlob);
 
 
 audioArea.innerHTML=
+
 `
 
 <audio controls>
@@ -299,7 +323,7 @@ audioArea.innerHTML=
 
 
 resultDiv.innerHTML=
-"✅ 录音完成，可以提交判断";
+"✅ 录音完成，可以提交";
 
 
 };
@@ -318,7 +342,6 @@ resultDiv.innerHTML=
 
 }
 
-
 catch(error){
 
 
@@ -330,6 +353,8 @@ resultDiv.innerHTML=
 
 
 }
+
+
 
 
 
@@ -367,6 +392,7 @@ track.stop();
 
 
 
+
 function submitAnswer(){
 
 
@@ -386,20 +412,83 @@ return;
 
 
 resultDiv.innerHTML=
-"🤖 正在分析录音...";
+"🤖 分析中...";
 
 
 
-// 这里以后连接 AI
-// audioBlob 就是学生刚刚的声音文件
+// ============================
+// 这里以后接 AI 判断
+// 现在 Demo 模拟
+// ============================
 
 
 
 setTimeout(()=>{
 
 
+
+let answer=true;
+
+
+
+if(answer){
+
+
+document.body.className="correct";
+
+
 resultDiv.innerHTML=
-"✅ AI判断完成（测试模式）";
+"✅ 正确！";
+
+
+setTimeout(()=>{
+
+
+current++;
+
+
+if(current < words.length){
+
+
+showWord();
+
+
+}
+
+else{
+
+
+wordDiv.innerHTML="🎉";
+
+pinyinDiv.innerHTML="完成";
+
+resultDiv.innerHTML=
+"全部完成";
+
+
+}
+
+
+
+},1000);
+
+
+
+}
+
+
+else{
+
+
+document.body.className="wrong";
+
+
+resultDiv.innerHTML=
+"❌ 错误，请重新朗读";
+
+
+}
+
 
 
 },1500);
@@ -407,6 +496,7 @@ resultDiv.innerHTML=
 
 
 }
+
 
 
 
