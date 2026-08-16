@@ -2,74 +2,63 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>Moon AI 汉字朗读</title>
+<title>Moon AI 汉字朗读 V2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
+
+body{
     margin:0;
-    font-family:"Noto Sans SC", sans-serif;
+    height:100vh;
     display:flex;
     flex-direction:column;
-    align-items:center;
     justify-content:center;
-    height:100vh;
-    transition:0.3s;
+    align-items:center;
+    font-family:"Microsoft YaHei";
 }
 
-.card {
+.word{
     font-size:120px;
-    margin-bottom:20px;
 }
 
-.pinyin {
+.pinyin{
     font-size:35px;
-    color:#555;
-    margin-bottom:40px;
+    color:#666;
+    margin:20px;
 }
 
-button {
+button{
     font-size:25px;
-    padding:15px 35px;
+    padding:15px 40px;
     border:none;
     border-radius:10px;
-    cursor:pointer;
-    margin:10px;
-}
-
-.start {
     background:#2196F3;
     color:white;
 }
 
-.result {
+.result{
     font-size:30px;
     margin-top:30px;
-}
-
-.correct {
-    background:#c8f7c5;
-}
-
-.wrong {
-    background:#ffcdd2;
 }
 
 </style>
 
 </head>
 
+
 <body>
 
-<div class="card" id="word">
-开始
+
+<div class="word">
+马
 </div>
 
-<div class="pinyin" id="pinyin">
+<div class="pinyin">
+mǎ
 </div>
 
 
-<button class="start" onclick="startListening()">
+<button onclick="startRecording()">
 🎤 开始朗读
 </button>
 
@@ -78,217 +67,106 @@ button {
 </div>
 
 
-<button onclick="restart()">
-重新开始
-</button>
-
-
 <script>
 
 
-const originalWords = [
+let recorder;
+let audioChunks=[];
 
-{
-word:"一",
-pinyin:"yī"
-},
 
-{
-word:"二",
-pinyin:"èr"
-},
 
-{
-word:"三",
-pinyin:"sān"
-},
+async function startRecording(){
 
-{
-word:"四",
-pinyin:"sì"
-},
 
-{
-word:"五",
-pinyin:"wǔ"
-}
+document.getElementById("result").innerHTML=
+"🎧 正在听...";
 
-];
 
+audioChunks=[];
 
-let words=[];
-let current=0;
-let wrongWords=[];
 
+try{
 
-const wordDiv=document.getElementById("word");
-const pinyinDiv=document.getElementById("pinyin");
-const resultDiv=document.getElementById("result");
 
+let stream =
+await navigator.mediaDevices.getUserMedia({
+audio:true
+});
 
 
-function shuffle(arr){
+recorder =
+new MediaRecorder(stream);
 
-return arr.sort(()=>Math.random()-0.5);
 
-}
 
+recorder.ondataavailable=function(e){
 
+audioChunks.push(e.data);
 
-function showWord(){
+};
 
-wordDiv.innerHTML=words[current].word;
-pinyinDiv.innerHTML=words[current].pinyin;
 
-resultDiv.innerHTML="";
 
-}
+recorder.onstop=function(){
 
 
+let audioBlob =
+new Blob(audioChunks,{
+type:"audio/webm"
+});
 
-function restart(){
 
-words=shuffle([...originalWords]);
+let audioURL =
+URL.createObjectURL(audioBlob);
 
-current=0;
 
-wrongWords=[];
 
-document.body.className="";
+document.getElementById("result").innerHTML=
+`
+✅ 录音完成<br>
 
-showWord();
+<audio controls src="${audioURL}"></audio>
+`;
 
-}
+};
 
 
 
-function startListening(){
+recorder.start();
 
-
-resultDiv.innerHTML="🎧 正在听...";
-
-
-const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
-
-
-
-if(!SpeechRecognition){
-
-alert("你的浏览器不支持语音识别，请使用 Chrome");
-
-return;
-
-}
-
-
-
-const recognition=new SpeechRecognition();
-
-
-recognition.lang="zh-CN";
-
-recognition.continuous=false;
-
-recognition.interimResults=false;
-
-
-
-recognition.start();
-
-
-
-recognition.onresult=function(event){
-
-
-let answer=
-event.results[0][0].transcript.trim();
-
-
-
-let correctWord=
-words[current].word;
-
-
-
-console.log("学生:",answer);
-
-console.log("答案:",correctWord);
-
-
-
-if(answer===correctWord){
-
-
-document.body.className="correct";
-
-resultDiv.innerHTML=
-"✅ 正确！";
 
 
 setTimeout(()=>{
 
 
-current++;
+recorder.stop();
 
 
-if(current<words.length){
+stream.getTracks().forEach(track=>{
+track.stop();
+});
 
-showWord();
 
-}else{
+},1500);
 
-wordDiv.innerHTML="🎉";
 
-pinyinDiv.innerHTML="完成";
-
-resultDiv.innerHTML=
-"学习完成！<br>错误："+wrongWords.join("，");
 
 }
+catch(error){
 
 
-},800);
-
-
-
-}else{
-
-
-document.body.className="wrong";
-
-
-wrongWords.push(correctWord);
-
-
-resultDiv.innerHTML=
-"❌ 再试一次<br>你读："+answer;
+document.getElementById("result").innerHTML=
+"❌ 麦克风无法使用";
 
 
 }
 
 
-};
-
-
-
-recognition.onerror=function(){
-
-resultDiv.innerHTML=
-"没有听清，请再读一次";
-
-};
-
-
 }
-
-
-
-restart();
 
 
 </script>
+
 
 </body>
 </html>
