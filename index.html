@@ -1,72 +1,106 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
+
 <meta charset="UTF-8">
-<title>Moon AI 汉字朗读 V4</title>
+
+<title>
+Moon AI 汉字朗读 V5.5
+</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
 <style>
 
 body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    font-family:"Microsoft YaHei";
-    transition:.3s;
+
+margin:0;
+height:100vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+font-family:"Microsoft YaHei";
+
 }
 
 
 .word{
-    font-size:120px;
+
+font-size:120px;
+
 }
 
 
 .pinyin{
-    font-size:35px;
-    color:#666;
-    margin:20px;
+
+font-size:35px;
+color:#666;
+margin:20px;
+
 }
 
 
+
 button{
-    font-size:24px;
-    padding:15px 30px;
-    margin:10px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
+
+font-size:24px;
+padding:15px 30px;
+margin:8px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+
 }
 
 
 .start{
-    background:#2196F3;
-    color:white;
+
+background:#2196F3;
+color:white;
+
 }
 
 
 .stop{
-    background:#f44336;
-    color:white;
+
+background:#f44336;
+color:white;
+
+}
+
+
+.submit{
+
+background:#4CAF50;
+color:white;
+
 }
 
 
 .result{
-    font-size:28px;
-    margin-top:30px;
+
+font-size:28px;
+margin-top:30px;
+
 }
+
 
 
 .correct{
-    background:#c8f7c5;
+
+background:#c8f7c5;
+
 }
 
 
+
 .wrong{
-    background:#ffcdd2;
+
+background:#ffcdd2;
+
 }
 
 
@@ -78,23 +112,47 @@ button{
 <body>
 
 
-<div class="word" id="word"></div>
 
-<div class="pinyin" id="pinyin"></div>
+<div class="word" id="word">
+
+</div>
 
 
-<button class="start" onclick="startListening()">
-🎤 开始朗读
+<div class="pinyin" id="pinyin">
+
+</div>
+
+
+
+<button class="start" onclick="startRecording()">
+
+🎤 开始录音
+
 </button>
 
 
-<button class="stop" onclick="stopListening()">
-⏹ 结束朗读
+<button class="stop" onclick="stopRecording()">
+
+⏹ 结束录音
+
 </button>
+
+
+<button class="submit" onclick="submitAnswer()">
+
+📤 提交判断
+
+</button>
+
 
 
 <div class="result" id="result">
+
+等待开始
+
 </div>
+
+
 
 
 
@@ -103,30 +161,36 @@ button{
 
 const words=[
 
+
 {
 word:"猫",
 pinyin:"māo"
 },
+
 
 {
 word:"狗",
 pinyin:"gǒu"
 },
 
+
 {
 word:"马",
 pinyin:"mǎ"
 },
+
 
 {
 word:"鸟",
 pinyin:"niǎo"
 },
 
+
 {
 word:"鱼",
 pinyin:"yú"
 }
+
 
 ];
 
@@ -134,19 +198,30 @@ pinyin:"yú"
 
 let current=0;
 
-let recognition=null;
 
-let isListening=false;
+let mediaRecorder;
 
-let studentAnswer="";
+let audioChunks=[];
+
+let audioBlob=null;
+
+let stream=null;
+
+
+
+let recognitionResult="";
+
+
 
 
 
 const wordDiv=
 document.getElementById("word");
 
+
 const pinyinDiv=
 document.getElementById("pinyin");
+
 
 const resultDiv=
 document.getElementById("result");
@@ -166,10 +241,137 @@ pinyinDiv.innerHTML=
 words[current].pinyin;
 
 
-resultDiv.innerHTML="";
+resultDiv.innerHTML=
+"等待朗读";
 
 
 document.body.className="";
+
+
+audioBlob=null;
+
+
+}
+
+
+
+
+// 开始录音
+
+async function startRecording(){
+
+
+audioChunks=[];
+
+
+recognitionResult="";
+
+
+
+try{
+
+
+stream =
+await navigator.mediaDevices.getUserMedia({
+
+audio:true
+
+});
+
+
+
+mediaRecorder =
+new MediaRecorder(stream);
+
+
+
+mediaRecorder.ondataavailable=function(e){
+
+
+if(e.data.size>0){
+
+audioChunks.push(e.data);
+
+}
+
+
+};
+
+
+
+
+mediaRecorder.onstop=function(){
+
+
+audioBlob =
+new Blob(
+audioChunks,
+{
+type:"audio/webm"
+}
+);
+
+
+
+resultDiv.innerHTML=
+"✅ 录音完成，请提交判断";
+
+
+};
+
+
+
+
+mediaRecorder.start();
+
+
+
+resultDiv.innerHTML=
+"🎧 正在录音...";
+
+
+
+}
+
+catch(error){
+
+
+resultDiv.innerHTML=
+"❌ 无法使用麦克风";
+
+
+}
+
+
+
+}
+
+
+
+
+// 停止录音
+
+function stopRecording(){
+
+
+
+if(mediaRecorder &&
+mediaRecorder.state!=="inactive"){
+
+
+
+mediaRecorder.stop();
+
+
+
+stream.getTracks().forEach(track=>{
+
+track.stop();
+
+});
+
+
+}
 
 
 }
@@ -178,15 +380,43 @@ document.body.className="";
 
 
 
-function startListening(){
+// 提交判断
+
+function submitAnswer(){
 
 
-if(isListening)
+
+if(!audioBlob){
+
+
+resultDiv.innerHTML=
+"请先录音";
+
+
 return;
 
 
+}
 
-studentAnswer="";
+
+
+// 这里暂时模拟判断
+
+startSpeechCheck();
+
+
+
+}
+
+
+
+
+
+
+// 用语音识别读取录音内容
+
+function startSpeechCheck(){
+
 
 
 const SpeechRecognition =
@@ -197,15 +427,19 @@ window.webkitSpeechRecognition;
 
 if(!SpeechRecognition){
 
-alert("请使用 Google Chrome");
+
+alert("请使用Chrome");
+
 
 return;
+
 
 }
 
 
 
-recognition =
+
+let recognition =
 new SpeechRecognition();
 
 
@@ -213,17 +447,7 @@ new SpeechRecognition();
 recognition.lang="zh-CN";
 
 
-// 连续监听
-recognition.continuous=true;
-
-
-// 开启即时结果
-recognition.interimResults=true;
-
-
-
-isListening=true;
-
+recognition.interimResults=false;
 
 
 recognition.start();
@@ -231,89 +455,28 @@ recognition.start();
 
 
 resultDiv.innerHTML=
-"🎧 正在听...";
-
-
+"🤖 AI分析中...";
 
 
 
 recognition.onresult=function(event){
 
 
-
-let text="";
-
-
-
-for(
-let i=0;
-i<event.results.length;
-i++
-){
-
-text +=
-event.results[i][0].transcript;
-
-}
+let answer =
+event.results[0][0].transcript.trim();
 
 
 
-text=text.trim();
-
-
-
-studentAnswer=text;
-
-
-
-resultDiv.innerHTML=
-"听到：" + text;
-
-
-
-checkAnswer(text);
-
-
-
-};
-
-
-
-recognition.onerror=function(){
-
-
-resultDiv.innerHTML=
-"❌ 没有听清";
-
-
-};
-
-}
-
-
-
-
-
-function checkAnswer(text){
-
-
-let correct=
+let correct =
 words[current].word;
 
 
 
-// 去掉重复，例如 猫猫猫
-let clean=text.replace(
-new RegExp(correct,"g"),
-correct
-);
+console.log(answer);
 
 
 
-if(clean.includes(correct)){
-
-
-stopListening();
+if(answer.includes(correct)){
 
 
 
@@ -336,7 +499,8 @@ if(current < words.length){
 
 showWord();
 
-}else{
+}
+else{
 
 
 wordDiv.innerHTML="🎉";
@@ -350,12 +514,7 @@ resultDiv.innerHTML=
 }
 
 
-
-},800);
-
-
-
-}
+},1000);
 
 
 
@@ -363,26 +522,27 @@ resultDiv.innerHTML=
 
 
 
+else{
 
 
-
-function stopListening(){
-
-
-if(recognition){
+document.body.className="wrong";
 
 
-recognition.stop();
+resultDiv.innerHTML=
 
+`
+❌ 错误<br>
+系统听到：${answer}
+`;
 
-recognition=null;
 
 
 }
 
 
 
-isListening=false;
+};
+
 
 
 }
@@ -399,4 +559,5 @@ showWord();
 
 
 </body>
+
 </html>
