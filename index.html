@@ -4,10 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-
-<title>
-Moon AI 汉字朗读 V5.5
-</title>
+<title>Moon AI 汉字朗读完整版</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -15,96 +12,73 @@ Moon AI 汉字朗读 V5.5
 <style>
 
 body{
-
-margin:0;
-height:100vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-font-family:"Microsoft YaHei";
-
+    margin:0;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    font-family:"Microsoft YaHei";
 }
 
 
 .word{
-
-font-size:120px;
-
+    font-size:120px;
 }
 
 
 .pinyin{
-
-font-size:35px;
-color:#666;
-margin:20px;
-
+    font-size:35px;
+    color:#666;
+    margin:20px;
 }
-
 
 
 button{
 
-font-size:24px;
-padding:15px 30px;
-margin:8px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-
+    font-size:22px;
+    padding:15px 30px;
+    margin:8px;
+    border:none;
+    border-radius:10px;
 }
 
 
 .start{
-
-background:#2196F3;
-color:white;
-
+    background:#2196F3;
+    color:white;
 }
 
 
 .stop{
-
-background:#f44336;
-color:white;
-
+    background:#f44336;
+    color:white;
 }
 
 
 .submit{
-
-background:#4CAF50;
-color:white;
-
+    background:#4CAF50;
+    color:white;
 }
 
 
 .result{
 
-font-size:28px;
-margin-top:30px;
+    font-size:28px;
+    margin-top:25px;
 
 }
 
 
+audio{
 
-.correct{
-
-background:#c8f7c5;
-
-}
-
-
-
-.wrong{
-
-background:#ffcdd2;
+    margin-top:20px;
 
 }
 
 
 </style>
+
 
 </head>
 
@@ -113,46 +87,33 @@ background:#ffcdd2;
 
 
 
-<div class="word" id="word">
+<div class="word" id="word"></div>
 
-</div>
-
-
-<div class="pinyin" id="pinyin">
-
-</div>
+<div class="pinyin" id="pinyin"></div>
 
 
 
 <button class="start" onclick="startRecording()">
-
 🎤 开始录音
-
 </button>
 
 
 <button class="stop" onclick="stopRecording()">
-
 ⏹ 结束录音
-
 </button>
 
 
 <button class="submit" onclick="submitAnswer()">
-
 📤 提交判断
-
 </button>
 
 
-
-<div class="result" id="result">
-
+<div id="result" class="result">
 等待开始
-
 </div>
 
 
+<div id="audioArea"></div>
 
 
 
@@ -161,70 +122,59 @@ background:#ffcdd2;
 
 const words=[
 
-
 {
 word:"猫",
 pinyin:"māo"
 },
-
 
 {
 word:"狗",
 pinyin:"gǒu"
 },
 
-
 {
 word:"马",
 pinyin:"mǎ"
 },
-
 
 {
 word:"鸟",
 pinyin:"niǎo"
 },
 
-
 {
 word:"鱼",
 pinyin:"yú"
 }
 
-
 ];
-
 
 
 let current=0;
 
+let recorder;
 
-let mediaRecorder;
-
-let audioChunks=[];
+let chunks=[];
 
 let audioBlob=null;
+
+let audioURL=null;
 
 let stream=null;
 
 
 
-let recognitionResult="";
-
-
-
-
-
-const wordDiv=
+const word=
 document.getElementById("word");
 
-
-const pinyinDiv=
+const pinyin=
 document.getElementById("pinyin");
 
-
-const resultDiv=
+const result=
 document.getElementById("result");
+
+const audioArea=
+document.getElementById("audioArea");
 
 
 
@@ -232,20 +182,19 @@ document.getElementById("result");
 
 function showWord(){
 
-
-wordDiv.innerHTML=
+word.innerHTML=
 words[current].word;
 
 
-pinyinDiv.innerHTML=
+pinyin.innerHTML=
 words[current].pinyin;
 
 
-resultDiv.innerHTML=
+result.innerHTML=
 "等待朗读";
 
 
-document.body.className="";
+audioArea.innerHTML="";
 
 
 audioBlob=null;
@@ -256,16 +205,12 @@ audioBlob=null;
 
 
 
-// 开始录音
-
 async function startRecording(){
 
 
-audioChunks=[];
+chunks=[];
 
-
-recognitionResult="";
-
+audioArea.innerHTML="";
 
 
 try{
@@ -280,17 +225,17 @@ audio:true
 
 
 
-mediaRecorder =
+recorder =
 new MediaRecorder(stream);
 
 
 
-mediaRecorder.ondataavailable=function(e){
+recorder.ondataavailable=function(e){
 
 
 if(e.data.size>0){
 
-audioChunks.push(e.data);
+chunks.push(e.data);
 
 }
 
@@ -299,13 +244,12 @@ audioChunks.push(e.data);
 
 
 
-
-mediaRecorder.onstop=function(){
+recorder.onstop=function(){
 
 
 audioBlob =
 new Blob(
-audioChunks,
+chunks,
 {
 type:"audio/webm"
 }
@@ -313,7 +257,22 @@ type:"audio/webm"
 
 
 
-resultDiv.innerHTML=
+audioURL =
+URL.createObjectURL(audioBlob);
+
+
+
+audioArea.innerHTML=
+
+`
+<audio controls>
+<source src="${audioURL}">
+</audio>
+`;
+
+
+
+result.innerHTML=
 "✅ 录音完成，请提交判断";
 
 
@@ -321,47 +280,41 @@ resultDiv.innerHTML=
 
 
 
-
-mediaRecorder.start();
-
+recorder.start();
 
 
-resultDiv.innerHTML=
+
+result.innerHTML=
 "🎧 正在录音...";
 
 
-
 }
 
-catch(error){
+catch(e){
 
 
-resultDiv.innerHTML=
-"❌ 无法使用麦克风";
-
-
-}
-
+result.innerHTML=
+"❌ 麦克风失败";
 
 
 }
 
 
 
+}
 
-// 停止录音
+
+
+
 
 function stopRecording(){
 
 
-
-if(mediaRecorder &&
-mediaRecorder.state!=="inactive"){
-
+if(recorder &&
+recorder.state==="recording"){
 
 
-mediaRecorder.stop();
-
+recorder.stop();
 
 
 stream.getTracks().forEach(track=>{
@@ -374,118 +327,52 @@ track.stop();
 }
 
 
+
 }
 
 
 
 
 
-// 提交判断
-
-function submitAnswer(){
+async function submitAnswer(){
 
 
 
 if(!audioBlob){
 
-
-resultDiv.innerHTML=
+result.innerHTML=
 "请先录音";
 
-
 return;
 
-
 }
 
 
 
-// 这里暂时模拟判断
-
-startSpeechCheck();
-
-
-
-}
-
-
-
-
-
-
-// 用语音识别读取录音内容
-
-function startSpeechCheck(){
-
-
-
-const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
-
-
-
-if(!SpeechRecognition){
-
-
-alert("请使用Chrome");
-
-
-return;
-
-
-}
-
-
-
-
-let recognition =
-new SpeechRecognition();
-
-
-
-recognition.lang="zh-CN";
-
-
-recognition.interimResults=false;
-
-
-recognition.start();
-
-
-
-resultDiv.innerHTML=
+result.innerHTML=
 "🤖 AI分析中...";
 
 
 
-recognition.onresult=function(event){
-
-
-let answer =
-event.results[0][0].transcript.trim();
-
-
-
-let correct =
-words[current].word;
+// =================================
+// 未来这里连接 Azure Speech
+// 现在模拟
+// =================================
 
 
 
-console.log(answer);
+setTimeout(()=>{
+
+
+let fakeResult=true;
 
 
 
-if(answer.includes(correct)){
+if(fakeResult){
 
 
-
-document.body.className="correct";
-
-
-resultDiv.innerHTML=
+result.innerHTML=
 "✅ 正确！";
-
 
 
 setTimeout(()=>{
@@ -494,8 +381,7 @@ setTimeout(()=>{
 current++;
 
 
-
-if(current < words.length){
+if(current<words.length){
 
 showWord();
 
@@ -503,45 +389,33 @@ showWord();
 else{
 
 
-wordDiv.innerHTML="🎉";
+word.innerHTML="🎉";
 
-pinyinDiv.innerHTML="完成";
+pinyin.innerHTML="完成";
 
-resultDiv.innerHTML=
+result.innerHTML=
 "全部完成";
 
-
 }
+
 
 
 },1000);
 
 
 
-}
+}else{
 
 
-
-else{
-
-
-document.body.className="wrong";
-
-
-resultDiv.innerHTML=
-
-`
-❌ 错误<br>
-系统听到：${answer}
-`;
-
+result.innerHTML=
+"❌ 错误，请重新录音";
 
 
 }
 
 
 
-};
+},1500);
 
 
 
@@ -552,7 +426,6 @@ resultDiv.innerHTML=
 
 
 showWord();
-
 
 
 </script>
