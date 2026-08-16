@@ -4,7 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Moon AI 汉字朗读完整版</title>
+<title>Moon AI 汉字朗读 V6</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -36,29 +36,37 @@ body{
 
 button{
 
-    font-size:22px;
+    font-size:24px;
     padding:15px 30px;
     margin:8px;
     border:none;
     border-radius:10px;
+    cursor:pointer;
+
 }
 
 
 .start{
+
     background:#2196F3;
     color:white;
+
 }
 
 
 .stop{
+
     background:#f44336;
     color:white;
+
 }
 
 
 .submit{
+
     background:#4CAF50;
     color:white;
+
 }
 
 
@@ -87,20 +95,25 @@ audio{
 
 
 
-<div class="word" id="word"></div>
+<div class="word" id="word">
+</div>
 
-<div class="pinyin" id="pinyin"></div>
+
+<div class="pinyin" id="pinyin">
+</div>
 
 
 
 <button class="start" onclick="startRecording()">
-🎤 开始录音
+🎤 开始朗读
 </button>
+
 
 
 <button class="stop" onclick="stopRecording()">
-⏹ 结束录音
+⏹ 结束朗读
 </button>
+
 
 
 <button class="submit" onclick="submitAnswer()">
@@ -108,12 +121,15 @@ audio{
 </button>
 
 
-<div id="result" class="result">
+
+<div class="result" id="result">
 等待开始
 </div>
 
 
 <div id="audioArea"></div>
+
+
 
 
 
@@ -150,30 +166,33 @@ pinyin:"yú"
 ];
 
 
+
 let current=0;
 
-let recorder;
 
-let chunks=[];
+let mediaRecorder=null;
+
+let audioChunks=[];
 
 let audioBlob=null;
-
-let audioURL=null;
 
 let stream=null;
 
 
 
-const word=
+const wordDiv =
 document.getElementById("word");
 
-const pinyin=
+
+const pinyinDiv =
 document.getElementById("pinyin");
 
-const result=
+
+const resultDiv =
 document.getElementById("result");
 
-const audioArea=
+
+const audioArea =
 document.getElementById("audioArea");
 
 
@@ -182,15 +201,16 @@ document.getElementById("audioArea");
 
 function showWord(){
 
-word.innerHTML=
+
+wordDiv.innerHTML =
 words[current].word;
 
 
-pinyin.innerHTML=
+pinyinDiv.innerHTML =
 words[current].pinyin;
 
 
-result.innerHTML=
+resultDiv.innerHTML =
 "等待朗读";
 
 
@@ -208,7 +228,8 @@ audioBlob=null;
 async function startRecording(){
 
 
-chunks=[];
+audioChunks=[];
+
 
 audioArea.innerHTML="";
 
@@ -225,31 +246,33 @@ audio:true
 
 
 
-recorder =
+mediaRecorder =
 new MediaRecorder(stream);
 
 
 
-recorder.ondataavailable=function(e){
+mediaRecorder.ondataavailable=function(event){
 
 
-if(e.data.size>0){
+if(event.data.size>0){
 
-chunks.push(e.data);
+audioChunks.push(event.data);
 
 }
-
 
 };
 
 
 
-recorder.onstop=function(){
+
+
+mediaRecorder.onstop=function(){
+
 
 
 audioBlob =
 new Blob(
-chunks,
+audioChunks,
 {
 type:"audio/webm"
 }
@@ -257,48 +280,53 @@ type:"audio/webm"
 
 
 
-audioURL =
+let url =
 URL.createObjectURL(audioBlob);
 
 
 
 audioArea.innerHTML=
-
 `
+
 <audio controls>
-<source src="${audioURL}">
+
+<source src="${url}" type="audio/webm">
+
 </audio>
+
 `;
 
 
 
-result.innerHTML=
-"✅ 录音完成，请提交判断";
+resultDiv.innerHTML=
+"✅ 录音完成，可以提交判断";
 
 
 };
 
 
 
-recorder.start();
+
+
+mediaRecorder.start();
 
 
 
-result.innerHTML=
-"🎧 正在录音...";
-
-
-}
-
-catch(e){
-
-
-result.innerHTML=
-"❌ 麦克风失败";
+resultDiv.innerHTML=
+"🔴 正在录音...";
 
 
 }
 
+
+catch(error){
+
+
+resultDiv.innerHTML=
+"❌ 麦克风权限失败";
+
+
+}
 
 
 }
@@ -310,11 +338,14 @@ result.innerHTML=
 function stopRecording(){
 
 
-if(recorder &&
-recorder.state==="recording"){
+
+if(mediaRecorder &&
+mediaRecorder.state==="recording"){
 
 
-recorder.stop();
+
+mediaRecorder.stop();
+
 
 
 stream.getTracks().forEach(track=>{
@@ -334,85 +365,41 @@ track.stop();
 
 
 
-async function submitAnswer(){
+
+
+function submitAnswer(){
 
 
 
 if(!audioBlob){
 
-result.innerHTML=
-"请先录音";
+
+resultDiv.innerHTML=
+"请先完成录音";
+
 
 return;
 
+
 }
 
 
 
-result.innerHTML=
-"🤖 AI分析中...";
+resultDiv.innerHTML=
+"🤖 正在分析录音...";
 
 
 
-// =================================
-// 未来这里连接 Azure Speech
-// 现在模拟
-// =================================
+// 这里以后连接 AI
+// audioBlob 就是学生刚刚的声音文件
 
 
 
 setTimeout(()=>{
 
 
-let fakeResult=true;
-
-
-
-if(fakeResult){
-
-
-result.innerHTML=
-"✅ 正确！";
-
-
-setTimeout(()=>{
-
-
-current++;
-
-
-if(current<words.length){
-
-showWord();
-
-}
-else{
-
-
-word.innerHTML="🎉";
-
-pinyin.innerHTML="完成";
-
-result.innerHTML=
-"全部完成";
-
-}
-
-
-
-},1000);
-
-
-
-}else{
-
-
-result.innerHTML=
-"❌ 错误，请重新录音";
-
-
-}
-
+resultDiv.innerHTML=
+"✅ AI判断完成（测试模式）";
 
 
 },1500);
@@ -426,6 +413,7 @@ result.innerHTML=
 
 
 showWord();
+
 
 
 </script>
