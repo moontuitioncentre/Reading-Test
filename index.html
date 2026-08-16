@@ -2,7 +2,8 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>Moon AI 汉字朗读 V3</title>
+<title>Moon AI 汉字朗读 V4</title>
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -18,15 +19,18 @@ body{
     transition:.3s;
 }
 
+
 .word{
     font-size:120px;
 }
+
 
 .pinyin{
     font-size:35px;
     color:#666;
     margin:20px;
 }
+
 
 button{
     font-size:24px;
@@ -37,19 +41,32 @@ button{
     cursor:pointer;
 }
 
+
 .start{
     background:#2196F3;
     color:white;
 }
+
 
 .stop{
     background:#f44336;
     color:white;
 }
 
+
 .result{
     font-size:28px;
     margin-top:30px;
+}
+
+
+.correct{
+    background:#c8f7c5;
+}
+
+
+.wrong{
+    background:#ffcdd2;
 }
 
 
@@ -61,15 +78,9 @@ button{
 <body>
 
 
-<div class="word" id="word">
-马
-</div>
+<div class="word" id="word"></div>
 
-
-<div class="pinyin" id="pinyin">
-mǎ
-</div>
-
+<div class="pinyin" id="pinyin"></div>
 
 
 <button class="start" onclick="startListening()">
@@ -82,9 +93,7 @@ mǎ
 </button>
 
 
-
 <div class="result" id="result">
-
 </div>
 
 
@@ -93,6 +102,16 @@ mǎ
 
 
 const words=[
+
+{
+word:"猫",
+pinyin:"māo"
+},
+
+{
+word:"狗",
+pinyin:"gǒu"
+},
 
 {
 word:"马",
@@ -107,42 +126,67 @@ pinyin:"niǎo"
 {
 word:"鱼",
 pinyin:"yú"
-},
-
-{
-word:"猫",
-pinyin:"māo"
 }
 
 ];
 
 
+
 let current=0;
 
-let recognition;
+let recognition=null;
+
+let isListening=false;
+
+let studentAnswer="";
 
 
-const wordDiv=document.getElementById("word");
-const pinyinDiv=document.getElementById("pinyin");
-const resultDiv=document.getElementById("result");
+
+const wordDiv=
+document.getElementById("word");
+
+const pinyinDiv=
+document.getElementById("pinyin");
+
+const resultDiv=
+document.getElementById("result");
+
+
 
 
 
 function showWord(){
 
+
 wordDiv.innerHTML=
 words[current].word;
+
 
 pinyinDiv.innerHTML=
 words[current].pinyin;
 
+
 resultDiv.innerHTML="";
+
+
+document.body.className="";
+
 
 }
 
 
 
+
+
 function startListening(){
+
+
+if(isListening)
+return;
+
+
+
+studentAnswer="";
 
 
 const SpeechRecognition =
@@ -153,7 +197,7 @@ window.webkitSpeechRecognition;
 
 if(!SpeechRecognition){
 
-alert("请使用 Chrome 浏览器");
+alert("请使用 Google Chrome");
 
 return;
 
@@ -165,12 +209,20 @@ recognition =
 new SpeechRecognition();
 
 
+
 recognition.lang="zh-CN";
 
 
+// 连续监听
 recognition.continuous=true;
 
-recognition.interimResults=false;
+
+// 开启即时结果
+recognition.interimResults=true;
+
+
+
+isListening=true;
 
 
 
@@ -183,20 +235,44 @@ resultDiv.innerHTML=
 
 
 
+
+
 recognition.onresult=function(event){
+
 
 
 let text="";
 
 
-for(let i=0;i<event.results.length;i++){
 
-text += event.results[i][0].transcript;
+for(
+let i=0;
+i<event.results.length;
+i++
+){
+
+text +=
+event.results[i][0].transcript;
 
 }
 
 
-window.studentAnswer=text.trim();
+
+text=text.trim();
+
+
+
+studentAnswer=text;
+
+
+
+resultDiv.innerHTML=
+"听到：" + text;
+
+
+
+checkAnswer(text);
+
 
 
 };
@@ -205,36 +281,20 @@ window.studentAnswer=text.trim();
 
 recognition.onerror=function(){
 
+
 resultDiv.innerHTML=
 "❌ 没有听清";
 
+
 };
 
-
-
 }
 
 
 
-function stopListening(){
 
 
-if(!recognition){
-
-return;
-
-}
-
-
-recognition.stop();
-
-
-
-setTimeout(()=>{
-
-
-let answer=
-window.studentAnswer || "";
+function checkAnswer(text){
 
 
 let correct=
@@ -242,14 +302,27 @@ words[current].word;
 
 
 
-if(answer.includes(correct)){
+// 去掉重复，例如 猫猫猫
+let clean=text.replace(
+new RegExp(correct,"g"),
+correct
+);
 
 
-document.body.style.background="#c8f7c5";
+
+if(clean.includes(correct)){
+
+
+stopListening();
+
+
+
+document.body.className="correct";
 
 
 resultDiv.innerHTML=
-"✅ 正确";
+"✅ 正确！";
+
 
 
 setTimeout(()=>{
@@ -258,53 +331,68 @@ setTimeout(()=>{
 current++;
 
 
-if(current<words.length){
 
-document.body.style.background="white";
+if(current < words.length){
 
 showWord();
 
-
 }else{
+
 
 wordDiv.innerHTML="🎉";
 
 pinyinDiv.innerHTML="完成";
 
-}
-
-
-},1000);
-
-
-
-}else{
-
-
-document.body.style.background="#ffcdd2";
-
-
 resultDiv.innerHTML=
-`
-❌ 错误<br>
-你读：${answer || "没有识别到"}
-<br>
-请再试一次
-`;
+"全部完成";
 
 
 }
 
 
-},500);
+
+},800);
 
 
 
 }
+
+
+
+}
+
+
+
+
+
+
+function stopListening(){
+
+
+if(recognition){
+
+
+recognition.stop();
+
+
+recognition=null;
+
+
+}
+
+
+
+isListening=false;
+
+
+}
+
+
 
 
 
 showWord();
+
 
 
 </script>
