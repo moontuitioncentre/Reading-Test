@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Moon AI 汉字朗读</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin:0;
+    font-family:"Noto Sans SC", sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    transition:0.3s;
+}
+
+.card {
+    font-size:120px;
+    margin-bottom:20px;
+}
+
+.pinyin {
+    font-size:35px;
+    color:#555;
+    margin-bottom:40px;
+}
+
+button {
+    font-size:25px;
+    padding:15px 35px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    margin:10px;
+}
+
+.start {
+    background:#2196F3;
+    color:white;
+}
+
+.result {
+    font-size:30px;
+    margin-top:30px;
+}
+
+.correct {
+    background:#c8f7c5;
+}
+
+.wrong {
+    background:#ffcdd2;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card" id="word">
+开始
+</div>
+
+<div class="pinyin" id="pinyin">
+</div>
+
+
+<button class="start" onclick="startListening()">
+🎤 开始朗读
+</button>
+
+
+<div class="result" id="result">
+</div>
+
+
+<button onclick="restart()">
+重新开始
+</button>
+
+
+<script>
+
+
+const originalWords = [
+
+{
+word:"一",
+pinyin:"yī"
+},
+
+{
+word:"二",
+pinyin:"èr"
+},
+
+{
+word:"三",
+pinyin:"sān"
+},
+
+{
+word:"四",
+pinyin:"sì"
+},
+
+{
+word:"五",
+pinyin:"wǔ"
+}
+
+];
+
+
+let words=[];
+let current=0;
+let wrongWords=[];
+
+
+const wordDiv=document.getElementById("word");
+const pinyinDiv=document.getElementById("pinyin");
+const resultDiv=document.getElementById("result");
+
+
+
+function shuffle(arr){
+
+return arr.sort(()=>Math.random()-0.5);
+
+}
+
+
+
+function showWord(){
+
+wordDiv.innerHTML=words[current].word;
+pinyinDiv.innerHTML=words[current].pinyin;
+
+resultDiv.innerHTML="";
+
+}
+
+
+
+function restart(){
+
+words=shuffle([...originalWords]);
+
+current=0;
+
+wrongWords=[];
+
+document.body.className="";
+
+showWord();
+
+}
+
+
+
+function startListening(){
+
+
+resultDiv.innerHTML="🎧 正在听...";
+
+
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+
+
+if(!SpeechRecognition){
+
+alert("你的浏览器不支持语音识别，请使用 Chrome");
+
+return;
+
+}
+
+
+
+const recognition=new SpeechRecognition();
+
+
+recognition.lang="zh-CN";
+
+recognition.continuous=false;
+
+recognition.interimResults=false;
+
+
+
+recognition.start();
+
+
+
+recognition.onresult=function(event){
+
+
+let answer=
+event.results[0][0].transcript.trim();
+
+
+
+let correctWord=
+words[current].word;
+
+
+
+console.log("学生:",answer);
+
+console.log("答案:",correctWord);
+
+
+
+if(answer===correctWord){
+
+
+document.body.className="correct";
+
+resultDiv.innerHTML=
+"✅ 正确！";
+
+
+setTimeout(()=>{
+
+
+current++;
+
+
+if(current<words.length){
+
+showWord();
+
+}else{
+
+wordDiv.innerHTML="🎉";
+
+pinyinDiv.innerHTML="完成";
+
+resultDiv.innerHTML=
+"学习完成！<br>错误："+wrongWords.join("，");
+
+}
+
+
+},800);
+
+
+
+}else{
+
+
+document.body.className="wrong";
+
+
+wrongWords.push(correctWord);
+
+
+resultDiv.innerHTML=
+"❌ 再试一次<br>你读："+answer;
+
+
+}
+
+
+};
+
+
+
+recognition.onerror=function(){
+
+resultDiv.innerHTML=
+"没有听清，请再读一次";
+
+};
+
+
+}
+
+
+
+restart();
+
+
+</script>
+
+</body>
+</html>
