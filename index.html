@@ -4,100 +4,159 @@
 <head>
 
 <meta charset="UTF-8">
-<title>Moon AI 汉字朗读 V6.1</title>
+
+<title>
+Moon AI 汉字朗读 V4.1
+</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
 <style>
 
-body{
+
+body {
+
     margin:0;
-    height:100vh;
+
+    font-family:"Noto Sans SC",
+    "Microsoft YaHei",
+    sans-serif;
+
     display:flex;
+
     flex-direction:column;
-    justify-content:center;
+
     align-items:center;
-    font-family:"Microsoft YaHei";
+
+    justify-content:center;
+
+    height:100vh;
+
     transition:0.3s;
+
 }
 
 
-.word{
+
+.card {
+
     font-size:120px;
+
+    margin-bottom:20px;
+
 }
 
 
-.pinyin{
+
+.pinyin {
+
     font-size:35px;
+
     color:#666;
-    margin:20px;
+
+    margin-bottom:30px;
+
 }
 
 
-button{
 
-    font-size:22px;
-    padding:15px 30px;
-    margin:8px;
+button {
+
+    font-size:24px;
+
+    padding:12px 30px;
+
+    margin:10px;
+
     border:none;
+
     border-radius:10px;
+
     cursor:pointer;
 
 }
 
 
-.start{
+
+.start-btn {
 
     background:#2196F3;
+
     color:white;
 
 }
 
 
-.stop{
+
+.stop-btn {
 
     background:#f44336;
+
     color:white;
 
 }
 
 
-.submit{
+
+.restart-btn {
+
+    background:#333;
+
+    color:white;
+
+}
+
+
+
+.range-btn {
 
     background:#4CAF50;
+
     color:white;
 
 }
 
 
-.result{
+
+.result {
 
     font-size:28px;
-    margin-top:25px;
 
-}
-
-
-audio{
+    text-align:center;
 
     margin-top:20px;
 
 }
 
 
-.correct{
+
+.correct {
 
     background:#c8f7c5;
 
 }
 
 
-.wrong{
+
+.incorrect {
 
     background:#ffcdd2;
 
 }
+
+
+
+.wrong-list {
+
+    margin-top:20px;
+
+    color:red;
+
+    font-size:20px;
+
+}
+
 
 
 </style>
@@ -105,17 +164,25 @@ audio{
 </head>
 
 
+
 <body>
 
 
-<div class="word" id="word"></div>
+
+<div class="card" id="word">
+
+开始
+
+</div>
 
 
-<div class="pinyin" id="pinyin"></div>
+<div class="pinyin" id="pinyin">
+
+</div>
 
 
 
-<button class="start" onclick="startRecording()">
+<button class="start-btn" onclick="startListening()">
 
 🎤 开始朗读
 
@@ -123,17 +190,9 @@ audio{
 
 
 
-<button class="stop" onclick="stopRecording()">
+<button class="stop-btn" onclick="stopListening()">
 
-⏹ 结束朗读
-
-</button>
-
-
-
-<button class="submit" onclick="submitAnswer()">
-
-📤 提交判断
+⏹ 停止朗读
 
 </button>
 
@@ -141,101 +200,111 @@ audio{
 
 <div class="result" id="result">
 
-等待开始
-
 </div>
 
 
-<div id="audioArea"></div>
 
+<button class="restart-btn" onclick="restart()">
+
+重新开始
+
+</button>
+
+
+<button class="range-btn" onclick="selectRange()">
+
+选择词汇范围
+
+</button>
 
 
 
 <script>
 
 
-const words=[
+// 第2部分 JavaScript 会接这里
+const originalWords = [
 
-{
-word:"猫",
-pinyin:"māo"
-},
-
-{
-word:"狗",
-pinyin:"gǒu"
-},
-
-{
-word:"马",
-pinyin:"mǎ"
-},
-
-{
-word:"鸟",
-pinyin:"niǎo"
-},
-
-{
-word:"鱼",
-pinyin:"yú"
-}
+"猫",
+"狗",
+"马",
+"鸟",
+"鱼",
+"学校",
+"老师",
+"苹果"
 
 ];
 
 
 
-let current=0;
+let words = [];
+
+let selectedRange = [];
+
+let current = 0;
+
+let correct = 0;
+
+let wrong = 0;
+
+let wrongWords = [];
 
 
-let mediaRecorder=null;
 
-let audioChunks=[];
+let recognition = null;
 
-let audioBlob=null;
+let isListening = false;
 
-let stream=null;
-
+let resultTimer = null;
 
 
-const wordDiv=
+
+const wordDiv =
 document.getElementById("word");
 
 
-const pinyinDiv=
+const pinyinDiv =
 document.getElementById("pinyin");
 
 
-const resultDiv=
+const resultDiv =
 document.getElementById("result");
 
 
-const audioArea=
-document.getElementById("audioArea");
 
 
 
-
+// =======================
+// 显示词汇
+// =======================
 
 function showWord(){
 
 
-wordDiv.innerHTML=
-words[current].word;
+if(words[current]){
 
 
-pinyinDiv.innerHTML=
-words[current].pinyin;
+wordDiv.innerText =
+words[current];
 
 
-resultDiv.innerHTML=
-"等待朗读";
+}
+
+else{
 
 
-audioArea.innerHTML="";
+wordDiv.innerText =
+"请选择词汇";
 
 
-audioBlob=null;
+}
+
+
+pinyinDiv.innerText="";
+
+
+resultDiv.innerHTML="";
 
 
 document.body.className="";
@@ -248,40 +317,167 @@ document.body.className="";
 
 
 
-async function startRecording(){
+// =======================
+// 开始朗读
+// =======================
+
+function startListening(){
 
 
-audioChunks=[];
+
+if(isListening){
+
+return;
+
+}
 
 
-audioArea.innerHTML="";
+
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+
+
+if(!SpeechRecognition){
+
+alert("请使用 Google Chrome 浏览器");
+
+return;
+
+}
+
+
+
+
+recognition =
+new SpeechRecognition();
+
+
+
+recognition.lang =
+"zh-CN";
+
+
+
+// 持续监听
+
+recognition.continuous = true;
+
+
+
+// 即时结果
+
+recognition.interimResults = true;
+
+
+
+isListening = true;
+
+
+
+recognition.start();
+
+
+
+resultDiv.innerHTML =
+"🎧 正在听...";
+
+
+
+
+
+// =======================
+// 收到语音
+// =======================
+
+
+recognition.onresult=function(event){
+
+
+
+let text="";
+
+
+
+for(
+let i=0;
+i<event.results.length;
+i++
+){
+
+
+text +=
+event.results[i][0].transcript;
+
+
+}
+
+
+
+text =
+text.trim();
+
+
+
+resultDiv.innerHTML =
+"听到：" + text;
+
+
+
+
+// 延迟判断
+// 给单字更多时间
+
+
+clearTimeout(resultTimer);
+
+
+
+resultTimer =
+setTimeout(()=>{
+
+
+checkAnswer(text);
+
+
+},800);
+
+
+
+};
+
+
+
+
+
+
+
+// =======================
+// Chrome 自动停止后重新开启
+// =======================
+
+
+recognition.onend=function(){
+
+
+if(isListening){
 
 
 try{
 
 
-stream =
-await navigator.mediaDevices.getUserMedia({
+recognition.start();
 
-audio:true
-
-});
-
-
-
-mediaRecorder =
-new MediaRecorder(stream);
-
-
-
-mediaRecorder.ondataavailable=function(e){
-
-
-if(e.data.size>0){
-
-audioChunks.push(e.data);
 
 }
+
+catch(e){}
+
+
+
+}
+
 
 
 };
@@ -290,161 +486,126 @@ audioChunks.push(e.data);
 
 
 
-mediaRecorder.onstop=function(){
+
+recognition.onerror=function(){
 
 
-audioBlob =
-new Blob(
-audioChunks,
-{
-type:"audio/webm"
+};
+
+
+
+
 }
+
+
+
+
+
+
+
+
+// =======================
+// 停止朗读
+// =======================
+
+function stopListening(){
+
+
+
+isListening=false;
+
+
+
+if(recognition){
+
+
+recognition.stop();
+
+
+recognition=null;
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+// =======================
+// 判断答案
+// =======================
+
+
+function checkAnswer(text){
+
+
+
+if(!words[current]){
+
+return;
+
+}
+
+
+
+
+let answer =
+words[current];
+
+
+
+
+// 去除重复
+
+let cleanText =
+removeRepeat(text);
+
+
+
+console.log(
+"学生:",
+cleanText,
+"答案:",
+answer
 );
 
 
 
-let url =
-URL.createObjectURL(audioBlob);
 
 
+if(cleanText.includes(answer)){
 
-audioArea.innerHTML=
 
-`
 
-<audio controls>
+stopListening();
 
-<source src="${url}" type="audio/webm">
 
-</audio>
 
-`;
+correct++;
 
 
 
-resultDiv.innerHTML=
-"✅ 录音完成，可以提交";
+document.body.className =
+"correct";
 
 
-};
 
-
-
-
-
-mediaRecorder.start();
-
-
-
-resultDiv.innerHTML=
-"🔴 正在录音...";
-
-
-}
-
-catch(error){
-
-
-resultDiv.innerHTML=
-"❌ 麦克风权限失败";
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-function stopRecording(){
-
-
-
-if(mediaRecorder &&
-mediaRecorder.state==="recording"){
-
-
-
-mediaRecorder.stop();
-
-
-
-stream.getTracks().forEach(track=>{
-
-track.stop();
-
-});
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
-function submitAnswer(){
-
-
-
-if(!audioBlob){
-
-
-resultDiv.innerHTML=
-"请先完成录音";
-
-
-return;
-
-
-}
-
-
-
-resultDiv.innerHTML=
-"🤖 分析中...";
-
-
-
-// ============================
-// 这里以后接 AI 判断
-// 现在 Demo 模拟
-// ============================
-
-
-
-setTimeout(()=>{
-
-
-
-let answer=true;
-
-
-
-if(answer){
-
-
-document.body.className="correct";
-
-
-resultDiv.innerHTML=
+resultDiv.innerHTML =
 "✅ 正确！";
+
 
 
 setTimeout(()=>{
 
 
 current++;
+
 
 
 if(current < words.length){
@@ -458,55 +619,279 @@ showWord();
 else{
 
 
-wordDiv.innerHTML="🎉";
-
-pinyinDiv.innerHTML="完成";
-
-resultDiv.innerHTML=
-"全部完成";
+showResult();
 
 
 }
 
 
 
-},1000);
+},800);
+
 
 
 
 }
-
 
 else{
 
 
-document.body.className="wrong";
+document.body.className =
+"incorrect";
 
 
-resultDiv.innerHTML=
-"❌ 错误，请重新朗读";
-
-
-}
-
-
-
-},1500);
-
+resultDiv.innerHTML =
+"❌ 再试一次";
 
 
 }
 
 
 
+}
+
+
+
+
+
+
+
+
+// =======================
+// 过滤重复
+// 猫猫猫 -> 猫
+// =======================
+
+
+function removeRepeat(text){
+
+
+
+if(text.length<=1){
+
+return text;
+
+}
+
+
+
+let result="";
+
+
+
+for(let i=0;i<text.length;i++){
+
+
+if(text[i] !== text[i-1]){
+
+
+result += text[i];
+
+
+}
+
+
+}
+
+
+
+return result;
+
+
+
+}
+
+
+
+
+
+
+
+// =======================
+// 完成统计
+// =======================
+
+function showResult(){
+
+
+wordDiv.innerText =
+"🎉";
+
+
+resultDiv.innerHTML =
+
+`
+完成！<br><br>
+
+✅ 正确：${correct}<br>
+
+❌ 错误：${wrong}
+
+<br><br>
+
+<div class="wrong-list">
+
+${
+
+wrongWords.length>0
+
+?
+
+"错题："+wrongWords.join("，")
+
+:
+
+"没有错题"
+
+}
+
+</div>
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+// =======================
+// 重新开始
+// =======================
+
+function restart(){
+
+
+
+words =
+shuffle([...selectedRange]);
+
+
+
+current=0;
+
+correct=0;
+
+wrong=0;
+
+wrongWords=[];
 
 
 
 showWord();
 
 
+}
+
+
+
+
+
+
+
+function shuffle(array){
+
+
+return array.sort(
+()=>Math.random()-0.5
+);
+
+
+}
+
+
+
+
+
+
+
+
+// =======================
+// 选择范围
+// =======================
+
+function selectRange(){
+
+
+
+let start =
+prompt(
+"请输入开始词汇"
+);
+
+
+
+let end =
+prompt(
+"请输入结束词汇"
+);
+
+
+
+let startIndex =
+originalWords.indexOf(start);
+
+
+
+let endIndex =
+originalWords.indexOf(end);
+
+
+
+
+if(
+startIndex===-1 ||
+endIndex===-1 ||
+startIndex>endIndex
+){
+
+
+alert("词汇不存在");
+
+
+return;
+
+
+}
+
+
+
+
+selectedRange =
+originalWords.slice(
+startIndex,
+endIndex+1
+);
+
+
+
+restart();
+
+
+
+}
+
+
+
+
+
+
+// 初始加载
+
+selectedRange =
+[...originalWords];
+
+
+restart();
+
 
 </script>
+
 
 
 </body>
