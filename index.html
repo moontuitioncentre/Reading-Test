@@ -258,6 +258,8 @@ let isListening = false;
 
 let resultTimer = null;
 
+let isChecking = false;
+
 
 
 const wordDiv =
@@ -545,6 +547,14 @@ recognition=null;
 function checkAnswer(text){
 
 
+if(isChecking){
+    return;
+}
+
+
+isChecking = true;
+
+
 
 if(!words[current]){
 
@@ -584,6 +594,10 @@ if(cleanText.includes(answer)){
 
 
 stopListening();
+
+
+
+isChecking = false;
 
 
 
@@ -634,6 +648,9 @@ showResult();
 }
 
 else{
+
+
+isChecking = false;
 
 
 document.body.className =
