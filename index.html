@@ -569,32 +569,19 @@ function skipWord(){
 stopListening();
 
 
-// 记录错题
+// 记录跳过 = 错误
 
-if(!skipped){
+wrong++;
 
-    wrong++;
-
-    wrongWords.push(
-        words[current]
-    );
-
-    skipped = true;
-
-}
-
-
-// 显示提示
-
-document.body.className =
-"incorrect";
+wrongWords.push(
+words[current]
+);
 
 
 resultDiv.innerHTML =
 "➡️ 跳过：" + words[current];
 
 
-// 下一题
 
 setTimeout(()=>{
 
@@ -604,23 +591,18 @@ current++;
 
 if(current < words.length){
 
-
 showWord();
-
 
 }
 
 else{
 
-
 showResult();
-
 
 }
 
 
 },800);
-
 
 
 }
@@ -736,15 +718,6 @@ showResult();
 }
 
 else{
-
-
-if(!wrongWords.includes(words[current])){
-
-    wrong++;
-
-    wrongWords.push(words[current]);
-
-}
 
 
 isChecking = false;
