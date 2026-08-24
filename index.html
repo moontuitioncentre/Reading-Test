@@ -119,6 +119,16 @@ button {
 
 
 
+.skip-btn {
+
+    background:#ff9800;
+
+    color:white;
+
+}
+
+
+
 .result {
 
     font-size:28px;
@@ -193,6 +203,14 @@ button {
 <button class="stop-btn" onclick="stopListening()">
 
 ⏹ 停止朗读
+
+</button>
+
+
+
+<button class="skip-btn" onclick="skipWord()">
+
+➡️ 下一题
 
 </button>
 
@@ -506,6 +524,9 @@ recognition.onerror=function(){
 
 
 
+
+
+
 // =======================
 // 停止朗读
 // =======================
@@ -535,7 +556,65 @@ recognition=null;
 
 
 
+// =======================
+// 不会，跳过下一题
+// =======================
 
+function skipWord(){
+
+
+stopListening();
+
+
+// 记录错题
+
+wrong++;
+
+wrongWords.push(
+words[current]
+);
+
+
+// 显示提示
+
+document.body.className =
+"incorrect";
+
+
+resultDiv.innerHTML =
+"➡️ 跳过：" + words[current];
+
+
+// 下一题
+
+setTimeout(()=>{
+
+
+current++;
+
+
+if(current < words.length){
+
+
+showWord();
+
+
+}
+
+else{
+
+
+showResult();
+
+
+}
+
+
+},800);
+
+
+
+}
 
 
 
