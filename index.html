@@ -168,6 +168,80 @@ button {
 }
 
 
+/* PASS / FAIL 设计 */
+
+.pass-box,
+.fail-box {
+
+    font-size:50px;
+
+    font-weight:bold;
+
+    padding:30px;
+
+    border-radius:25px;
+
+    margin:20px;
+
+    animation:pop 0.5s ease;
+
+}
+
+
+.pass-box {
+
+    background:#d4ffd4;
+
+    color:#2e7d32;
+
+}
+
+
+.fail-box {
+
+    background:#ffd6d6;
+
+    color:#c62828;
+
+}
+
+
+.pass-small,
+.fail-small {
+
+    font-size:25px;
+
+    font-weight:normal;
+
+}
+
+.normal {
+
+    background:white;
+
+}
+
+@keyframes pop {
+
+    0% {
+
+        transform:scale(0.5);
+
+        opacity:0;
+
+    }
+
+
+    100% {
+
+        transform:scale(1);
+
+        opacity:1;
+
+    }
+
+}
+
 
 </style>
 
@@ -192,7 +266,7 @@ button {
 
 
 
-<button class="start-btn" onclick="startListening()">
+<button id="startBtn" class="start-btn" onclick="startListening()">
 
 🎤 开始朗读
 
@@ -200,7 +274,7 @@ button {
 
 
 
-<button class="stop-btn" onclick="stopListening()">
+<button id="stopBtn" class="stop-btn" onclick="stopListening()">
 
 ⏹ 停止朗读
 
@@ -208,7 +282,7 @@ button {
 
 
 
-<button class="skip-btn" onclick="skipWord()">
+<button id="skipBtn" class="skip-btn" onclick="skipWord()">
 
 ➡️ 下一题
 
@@ -330,7 +404,7 @@ resultDiv.innerHTML="";
 
 skipped = false;
 
-document.body.className="";
+document.body.className="normal";
 
 
 }
@@ -578,6 +652,12 @@ words[current]
 );
 
 
+// 背景变红
+
+document.body.className =
+"incorrect";
+
+
 resultDiv.innerHTML =
 "➡️ 跳过：" + words[current];
 
@@ -723,6 +803,8 @@ else{
 isChecking = false;
 
 
+// 保留错误背景
+
 document.body.className =
 "incorrect";
 
@@ -804,6 +886,18 @@ function showResult(){
 wordDiv.innerText =
 "🎊";
 
+// 清除答题背景颜色
+
+document.body.className="";
+
+// 隐藏按钮
+
+document.getElementById("startBtn").style.display="none";
+
+document.getElementById("stopBtn").style.display="none";
+
+document.getElementById("skipBtn").style.display="none";
+
 
 // 计算正确率
 
@@ -815,18 +909,56 @@ Math.round(
 
 // 判断是否通过
 
-let status = "";
+let statusHTML = "";
+
 
 if(accuracy >= 80){
 
-status =
-"🎉 PASS 通过";
+
+statusHTML = `
+
+<div class="pass-box">
+
+🎉<br>
+
+<span>PASS</span>
+
+<br>
+
+<span class="pass-small">
+
+优秀！继续保持
+
+</span>
+
+</div>
+
+`;
+
 
 }
 else{
 
-status =
-"❌ FAIL 需要加强";
+
+statusHTML = `
+
+<div class="fail-box">
+
+💪<br>
+
+<span>FAIL</span>
+
+<br>
+
+<span class="fail-small">
+
+继续努力，加油！
+
+</span>
+
+</div>
+
+`;
 
 }
 
@@ -837,7 +969,7 @@ resultDiv.innerHTML =
 `
 完成！<br><br>
 
-${status}
+${statusHTML}
 
 <br><br>
 
@@ -891,10 +1023,8 @@ wrongWords.length>0
 function restart(){
 
 
-
 words =
 shuffle([...selectedRange]);
-
 
 
 current=0;
@@ -905,6 +1035,14 @@ wrong=0;
 
 wrongWords=[];
 
+
+// 显示朗读按钮
+
+document.getElementById("startBtn").style.display="inline-block";
+
+document.getElementById("stopBtn").style.display="inline-block";
+
+document.getElementById("skipBtn").style.display="inline-block";
 
 
 showWord();
