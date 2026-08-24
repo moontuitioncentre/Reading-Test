@@ -268,6 +268,8 @@ let wrong = 0;
 
 let wrongWords = [];
 
+let skipped = false;
+
 
 
 let recognition = null;
@@ -326,6 +328,7 @@ pinyinDiv.innerText="";
 
 resultDiv.innerHTML="";
 
+skipped = false;
 
 document.body.className="";
 
@@ -568,11 +571,17 @@ stopListening();
 
 // 记录错题
 
-wrong++;
+if(!skipped){
 
-wrongWords.push(
-words[current]
-);
+    wrong++;
+
+    wrongWords.push(
+        words[current]
+    );
+
+    skipped = true;
+
+}
 
 
 // 显示提示
@@ -729,6 +738,15 @@ showResult();
 else{
 
 
+if(!wrongWords.includes(words[current])){
+
+    wrong++;
+
+    wrongWords.push(words[current]);
+
+}
+
+
 isChecking = false;
 
 
@@ -811,13 +829,50 @@ function showResult(){
 
 
 wordDiv.innerText =
-"🎉";
+"🎊";
+
+
+// 计算正确率
+
+let accuracy =
+Math.round(
+(correct / words.length) * 100
+);
+
+
+// 判断是否通过
+
+let status = "";
+
+if(accuracy >= 80){
+
+status =
+"🎉 PASS 通过";
+
+}
+else{
+
+status =
+"❌ FAIL 需要加强";
+
+}
+
 
 
 resultDiv.innerHTML =
 
 `
 完成！<br><br>
+
+${status}
+
+<br><br>
+
+📊 正确率：${accuracy}%<br>
+
+📝 总题数：${words.length}<br>
+
+<br>
 
 ✅ 正确：${correct}<br>
 
