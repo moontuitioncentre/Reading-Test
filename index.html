@@ -260,15 +260,15 @@ button {
 </div>
 
 
-<div class="pinyin" id="pinyin">
-
+<div class="meaning" id="meaning">
+    
 </div>
 
 
 
 <button id="startBtn" class="start-btn" onclick="startListening()">
 
-🎤 开始朗读
+🎤 Baca
 
 </button>
 
@@ -317,14 +317,14 @@ button {
 // 第2部分 JavaScript 会接这里
 const originalWords = [
 
-"猫",
-"狗",
-"马",
-"鸟",
-"鱼",
-"学校",
-"老师",
-"苹果"
+"kucing",
+"anjing",
+"kuda",
+"burung",
+"ikan",
+"sekolah",
+"guru",
+"epal"
 
 ];
 
@@ -359,11 +359,6 @@ let isChecking = false;
 const wordDiv =
 document.getElementById("word");
 
-
-const pinyinDiv =
-document.getElementById("pinyin");
-
-
 const resultDiv =
 document.getElementById("result");
 
@@ -395,10 +390,6 @@ wordDiv.innerText =
 
 
 }
-
-
-pinyinDiv.innerText="";
-
 
 resultDiv.innerHTML="";
 
@@ -453,7 +444,7 @@ new SpeechRecognition();
 
 
 recognition.lang =
-"zh-CN";
+"ms-MY";
 
 
 
@@ -973,17 +964,13 @@ ${statusHTML}
 
 <br><br>
 
-📊 正确率：${accuracy}%<br>
-
 📝 总题数：${words.length}<br>
-
-<br>
 
 ✅ 正确：${correct}<br>
 
-❌ 错误：${wrong}
+❌ 错误：${wrong}<br><br>
 
-<br><br>
+📊 正确率：${accuracy}%<br><br>
 
 <div class="wrong-list">
 
