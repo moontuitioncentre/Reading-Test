@@ -993,8 +993,7 @@ words[current];
 // 去除重复
 
 let cleanText =
-removeRepeat(text);
-
+text.trim();
 
 
 console.log(
@@ -1006,15 +1005,10 @@ answer
 
 
 
-
-
 if(
-cleanText
-.replace(/[.,!?]/g,"")
-.trim()
-.toLowerCase()
+cleanText.toLowerCase()
 .includes(
-answer.trim().toLowerCase()
+answer.toLowerCase()
 )
 ){
 
