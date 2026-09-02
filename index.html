@@ -940,7 +940,7 @@ words[current];
 // 去除重复
 
 let cleanText =
-text.trim();
+normalizeSpeech(text);
 
 
 console.log(
@@ -1472,7 +1472,108 @@ return matrix[b.length][a.length];
 }
 
 
+// =======================
+// 数字转换英文
+// =======================
 
+function normalizeSpeech(text){
+
+text =
+text.toLowerCase()
+.trim();
+
+text =
+text.replace(/[.,!?]/g,"");
+
+// 数字转换
+
+const numbers = {
+
+"0":"zero",
+"1":"one",
+"2":"two",
+"3":"three",
+"4":"four",
+"5":"five",
+"6":"six",
+"7":"seven",
+"8":"eight",
+"9":"nine",
+"10":"ten",
+"11":"eleven",
+"12":"twelve",
+"13":"thirteen",
+"14":"fourteen",
+"15":"fifteen",
+"16":"sixteen",
+"17":"seventeen",
+"18":"eighteen",
+"19":"nineteen",
+"20":"twenty"
+
+};
+
+
+if(numbers[text]){
+
+return numbers[text];
+
+}
+
+
+
+// 英文缩写转换
+
+const contractions = {
+
+"i have":"i've",
+
+"i am":"i'm",
+
+"you are":"you're",
+
+"we are":"we're",
+
+"they are":"they're",
+
+"do not":"don't",
+
+"does not":"doesn't",
+
+"did not":"didn't",
+
+"cannot":"can't",
+
+"can not":"can't",
+
+"have not":"haven't",
+
+"has not":"hasn't",
+
+"what is":"what's",
+
+"it is":"it's",
+
+"that is":"that's",
+
+"there is":"there's",
+
+"let us":"let's"
+
+};
+
+
+if(contractions[text]){
+
+return contractions[text];
+
+}
+
+
+
+return text;
+
+}
 
 // 初始加载
 
