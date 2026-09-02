@@ -338,39 +338,219 @@ button {
 // 第2部分 JavaScript 会接这里
 const originalWords = [
 
-'got', 'and', 'have', "i've", 'in', 'we', 'my', 'any',
-  'pizza', 'apple', 'like', 'you', 'look', "haven't", 'basket',
-  'on', 'sandwich', 'an', 'chicken', 'food', 'listen', 'write',
-  'banana', 'cake', 'carrots', 'at', 'peas', 'apples', 'are',
-  'sausages', 'fruit', 'no', 'to', 'grow', 'list', 'or',
-  'pictures', 'shopping', 'what', 'cheese', 'favourite', 'has',
-  'read', 'sausage', 'your', 'milk', 'say', 'vegetables', 'with',
-  'bananas', 'for', 'sorry', 'words', "don't", 'steak', 'carrot',
-  'day', 'match', 'onions', 'please', 'they', 'think', 'answer',
-  'buy', 'draw', 'ground', 'of', 'orange', 'would', 'yes',
-  'correct', 'cut', 'fried', 'is', 'juice', 'lunch', 'lunchtime',
-  'mum', 'numbers', 'picture', 'potatoes', 'tomatoes', 'trees',
-  'do', 'fill', 'help', 'out', 'piece', 'blanks', 'circle',
-  'colour', 'corn', 'dislikes', 'find', 'focus', 'hot', 'how',
-  'it', 'kitchen', 'make', 'mangoes', 'me', 'noodles', 'oh',
-  'oranges', 'questions', 'rice', 'sandwiches', 'skills', 'ten',
-  'then', 'tick', 'two', 'vegetable', 'want', 'wants', 'where',
-  'who', 'yummy', 'answers', 'ask', 'box', 'bread', 'broccoli',
-  'butter', 'choose', 'coconuts', 'complete', 'down', 'eggs',
-  'eleven', 'fourteen', 'from', 'grammar', 'her', 'here', 'his',
-  'lines', 'many', 'need', 'one', 'peaches', 'pears', 'plants',
-  'put', 'steaks', 'strawberries', 'thank', 'that', 'their',
-  'thirteen', "what's", 'audio', 'breakfast', 'card', 'chillies',
-  'coloured', 'come', 'core', 'cross', 'cupcakes', 'drink',
-  'each', 'eat', 'fantastic', 'favourites', 'fifteen', 'four',
-  'friend', 'get', 'grapes', 'green', 'group', 'half', "hasn't",
-  'healthy', 'him', "i'm", 'letters', 'listening', 'menu',
-  'nice', 'nineteen', 'ok', 'okay', 'onion', 'other', 'papaya',
-  'peanut', 'phonics', 'pineapple', 'pizzas', 'plant', 'potato',
-  'red', 'revision', 'says', 'science', 'sentences', 'shop',
-  'sixteen', 'slices', 'speaking', 'stick', 'sweets', 'take',
-  'three', 'tomato', 'tree', 'turn', 'twelve', 'which', 'writing'
-
+"got",
+"and",
+"have",
+"i've",
+"in",
+"we",
+"my",
+"any",
+"pizza",
+"apple",
+"like",
+"you",
+"look",
+"haven't",
+"basket",
+"on",
+"sandwich",
+"an",
+"chicken",
+"food",
+"listen",
+"write",
+"banana",
+"cake",
+"carrots",
+"at",
+"peas",
+"apples",
+"are",
+"sausages",
+"fruit",
+"no",
+"to",
+"grow",
+"list",
+"or",
+"pictures",
+"shopping",
+"what",
+"cheese",
+"favourite",
+"has",
+"read",
+"sausage",
+"your",
+"milk",
+"say",
+"vegetables",
+"with",
+"bananas",
+"for",
+"sorry",
+"words",
+"don't",
+"steak",
+"carrot",
+"day",
+"match",
+"onions",
+"please",
+"they",
+"think",
+"answer",
+"buy",
+"draw",
+"ground",
+"of",
+"orange",
+"would",
+"yes",
+"correct",
+"cut",
+"fried",
+"is",
+"juice",
+"lunch",
+"lunchtime",
+"mum",
+"numbers",
+"picture",
+"potatoes",
+"tomatoes",
+"trees",
+"do",
+"fill",
+"help",
+"out",
+"piece",
+"blanks",
+"circle",
+"colour",
+"corn",
+"dislikes",
+"find",
+"focus",
+"hot",
+"how",
+"it",
+"kitchen",
+"make",
+"mangoes",
+"me",
+"noodles",
+"oh",
+"oranges",
+"questions",
+"rice",
+"sandwiches",
+"skills",
+"ten",
+"then",
+"tick",
+"two",
+"vegetable",
+"want",
+"wants",
+"where",
+"who",
+"yummy",
+"answers",
+"ask",
+"box",
+"bread",
+"broccoli",
+"butter",
+"choose",
+"coconuts",
+"complete",
+"down",
+"eggs",
+"eleven",
+"fourteen",
+"from",
+"grammar",
+"her",
+"here",
+"his",
+"lines",
+"many",
+"need",
+"one",
+"peaches",
+"pears",
+"plants",
+"put",
+"steaks",
+"strawberries",
+"thank",
+"that",
+"their",
+"thirteen",
+"what's",
+"audio",
+"breakfast",
+"card",
+"chillies",
+"coloured",
+"come",
+"core",
+"cross",
+"cupcakes",
+"drink",
+"each",
+"eat",
+"fantastic",
+"favourites",
+"fifteen",
+"four",
+"friend",
+"get",
+"grapes",
+"green",
+"group",
+"half",
+"hasn't",
+"healthy",
+"him",
+"i'm",
+"letters",
+"listening",
+"menu",
+"nice",
+"nineteen",
+"ok",
+"okay",
+"onion",
+"other",
+"papaya",
+"peanut",
+"phonics",
+"pineapple",
+"pizzas",
+"plant",
+"potato",
+"red",
+"revision",
+"says",
+"science",
+"sentences",
+"shop",
+"sixteen",
+"slices",
+"speaking",
+"stick",
+"sweets",
+"take",
+"three",
+"tomato",
+"tree",
+"turn",
+"twelve",
+"which",
+"writing"
 ];
 
 
@@ -501,7 +681,7 @@ recognition.continuous = true;
 
 // 即时结果
 
-recognition.interimResults = true;
+recognition.interimResults = false;
 
 
 
@@ -772,12 +952,13 @@ answer
 
 
 
-if(
-cleanText.toLowerCase()
-.includes(
+let similarity = getSimilarity(
+cleanText.toLowerCase(),
 answer.toLowerCase()
-)
-){
+);
+
+
+if(similarity >= 0.7){
 
 stopListening();
 
@@ -1187,7 +1368,108 @@ restart();
 
 }
 
+// =======================
+// 英文发音相似度判断
+// =======================
 
+function getSimilarity(a,b){
+
+    if(a.includes(b) || b.includes(a)){
+        return 1;
+    }
+
+
+    let longer =
+    a.length > b.length ? a : b;
+
+
+    let shorter =
+    a.length > b.length ? b : a;
+
+
+    let longerLength =
+    longer.length;
+
+
+    if(longerLength === 0){
+        return 1;
+    }
+
+
+    let distance =
+    levenshtein(longer, shorter);
+
+
+    return (
+        longerLength - distance
+    ) / longerLength;
+
+}
+
+
+
+// 编辑距离算法
+
+function levenshtein(a,b){
+
+let matrix=[];
+
+
+for(let i=0;i<=b.length;i++){
+
+matrix[i]=[i];
+
+}
+
+
+for(let j=0;j<=a.length;j++){
+
+matrix[0][j]=j;
+
+}
+
+
+
+for(let i=1;i<=b.length;i++){
+
+for(let j=1;j<=a.length;j++){
+
+
+if(
+b.charAt(i-1)
+===
+a.charAt(j-1)
+){
+
+matrix[i][j]=matrix[i-1][j-1];
+
+}
+
+else{
+
+
+matrix[i][j]=Math.min(
+
+matrix[i-1][j-1]+1,
+
+matrix[i][j-1]+1,
+
+matrix[i-1][j]+1
+
+);
+
+
+}
+
+
+}
+
+}
+
+
+return matrix[b.length][a.length];
+
+}
 
 
 
