@@ -263,6 +263,44 @@ button {
 
 }
 
+.phrase-box{
+
+    margin-top:10px;
+
+    margin-bottom:20px;
+
+    padding:15px 25px;
+
+    background:#f5f5f5;
+
+    border-radius:15px;
+
+    text-align:center;
+
+}
+
+
+.phrase-title{
+
+    font-size:18px;
+
+    color:#777;
+
+    margin-bottom:8px;
+
+}
+
+
+.phrase{
+
+    font-size:15px;
+
+    font-weight:bold;
+
+    color:#1565c0;
+
+}
+
 
 </style>
 
@@ -275,14 +313,21 @@ button {
 
 
 <div class="card" id="word">
-
 开始
-
 </div>
 
 
-<div class="meaning" id="meaning">
-    
+<div class="phrase-box">
+
+<div class="phrase-title">
+Short Phrase
+</div>
+
+
+<div class="phrase" id="phrase">
+
+</div>
+
 </div>
 
 
@@ -553,7 +598,221 @@ const originalWords = [
 "writing"
 ];
 
-
+const phrases = [
+"I got it",
+    "you and me",
+    "I have one",
+    "I've seen it",
+    "in the box",
+    "we are here",
+    "it's my turn",
+    "any questions",
+    "let's eat pizza",
+    "eat an apple",
+    "I like it",
+    "you are here",
+    "look at me",
+    "I haven't got",
+    "in the basket",
+    "on the table",
+    "eat a sandwich",
+    "an apple",
+    "cook the chicken",
+    "eat your food",
+    "listen to me",
+    "write it down",
+    "a banana",
+    "bake a cake",
+    "eat your carrots",
+    "at home",
+    "eat your peas",
+    "eat the apples",
+    "we are ready",
+    "cook the sausages",
+    "eat some fruit",
+    "no thanks",
+    "go to school",
+    "grow it",
+    "make a list",
+    "now or later",
+    "draw pictures",
+    "go shopping",
+    "what is it",
+    "cheese please",
+    "my favourite food",
+    "she has one",
+    "read the book",
+    "a sausage",
+    "your turn",
+    "drink your milk",
+    "say it again",
+    "eat vegetables",
+    "with me",
+    "buy bananas",
+    "for you",
+    "I'm sorry",
+    "learn the words",
+    "don't do it",
+    "cook the steak",
+    "a carrot",
+    "have a good day",
+    "match them",
+    "chop the onions",
+    "please help me",
+    "they are here",
+    "I think so",
+    "answer me",
+    "buy it",
+    "draw a picture",
+    "on the ground",
+    "a piece of",
+    "eat an orange",
+    "I would like",
+    "yes please",
+    "that's correct",
+    "cut it",
+    "fried egg",
+    "it is here",
+    "drink juice",
+    "eat lunch",
+    "it's lunchtime",
+    "yes mum",
+    "count the numbers",
+    "take a picture",
+    "mash the potatoes",
+    "eat tomatoes",
+    "climb trees",
+    "do it now",
+    "fill it in",
+    "help me please",
+    "go out",
+    "a piece of",
+    "fill the blanks",
+    "circle it",
+    "colour it in",
+    "sweet corn",
+    "he dislikes it",
+    "find it",
+    "focus on it",
+    "it's hot",
+    "how are you",
+    "it is",
+    "in the kitchen",
+    "make it",
+    "eat mangoes",
+    "with me",
+    "cook noodles",
+    "oh no",
+    "peel oranges",
+    "ask questions",
+    "cook rice",
+    "make sandwiches",
+    "learn new skills",
+    "ten of them",
+    "and then",
+    "tick the box",
+    "two of them",
+    "green vegetable",
+    "I want it",
+    "she wants it",
+    "where is it",
+    "who is it",
+    "it's yummy",
+    "give answers",
+    "ask me",
+    "in the box",
+    "eat bread",
+    "eat broccoli",
+    "add butter",
+    "choose one",
+    "buy coconuts",
+    "complete it",
+    "write it down",
+    "fry the eggs",
+    "eleven eggs",
+    "fourteen eggs",
+    "from me",
+    "learn grammar",
+    "give it to her",
+    "here it is",
+    "that's his",
+    "draw lines",
+    "so many",
+    "I need it",
+    "one more",
+    "eat peaches",
+    "eat pears",
+    "water the plants",
+    "put it down",
+    "cook the steaks",
+    "eat strawberries",
+    "thank you",
+    "that one",
+    "their house",
+    "thirteen eggs",
+    "what's that",
+    "listen to audio",
+    "eat breakfast",
+    "show the card",
+    "chop chillies",
+    "coloured pens",
+    "come here",
+    "the core",
+    "cross it out",
+    "bake cupcakes",
+    "drink it",
+    "each one",
+    "eat it",
+    "it's fantastic",
+    "my favourites",
+    "fifteen eggs",
+    "four eggs",
+    "my friend",
+    "get it",
+    "eat grapes",
+    "green apple",
+    "group work",
+    "half of it",
+    "she hasn't got",
+    "eat healthy",
+    "give it to him",
+    "I'm here",
+    "write letters",
+    "listening now",
+    "read the menu",
+    "it's nice",
+    "nineteen eggs",
+    "it's ok",
+    "it's okay",
+    "chop onion",
+    "the other one",
+    "eat papaya",
+    "eat peanuts",
+    "learn phonics",
+    "eat pineapple",
+    "make pizzas",
+    "plant it",
+    "bake a potato",
+    "red one",
+    "do revision",
+    "he says so",
+    "learn science",
+    "make sentences",
+    "go to the shop",
+    "sixteen eggs",
+    "two slices",
+    "keep speaking",
+    "stick it on",
+    "eat sweets",
+    "take it",
+    "three eggs",
+    "red tomato",
+    "big tree",
+    "turn it on",
+    "twelve eggs",
+    "which one",
+    "do your writing"
+];
 
 let words = [];
 
@@ -604,6 +863,8 @@ if(words[current]){
 wordDiv.innerText =
 words[current];
 
+document.getElementById("phrase").innerText =
+phrases[originalWords.indexOf(words[current])] || "";
 
 }
 
@@ -997,8 +1258,10 @@ else{
 
 
 if(
-    similarity >= threshold ||
-    soundSimilarity(cleanText, answer)
+similarity >= threshold
+||
+(soundSimilarity(cleanText, answer) 
+&& similarity >= 0.6)
 ){
 
 stopListening();
@@ -1805,7 +2068,7 @@ sb
 
 
 
-return score >= 0.55;
+return score >= 0.7;
 
 
 }
