@@ -963,12 +963,14 @@ answer.toLowerCase()
 let threshold = 0.7;
 
 
-// 短词降低要求
-// 例如 milk, got, and, we
-
 if(answer.length <= 4){
 
-    threshold = 0.6;
+    threshold = 0.55;
+
+}
+else if(answer.length >= 9){
+
+    threshold = 0.75;
 
 }
 
