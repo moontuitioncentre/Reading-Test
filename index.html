@@ -996,7 +996,10 @@ else{
 
 
 
-if(similarity >= threshold || phoneticMatch(cleanText, answer)){
+if(
+    similarity >= threshold ||
+    soundSimilarity(cleanText, answer)
+){
 
 stopListening();
 
@@ -1733,6 +1736,76 @@ return true;
 
 
 return false;
+
+
+}
+
+// =======================
+// 英文声音相似判断
+// =======================
+
+function soundSimilarity(a,b){
+
+
+a = a.toLowerCase();
+b = b.toLowerCase();
+
+
+// 常见发音规则统一
+
+function simplify(word){
+
+
+return word
+
+// 去掉标点
+.replace(/[^a-z]/g,"")
+
+// 常见结尾弱化
+.replace(/ed$/,"")
+
+.replace(/ing$/,"")
+
+// y 和 i 接近
+.replace(/y/g,"i")
+
+// c/k/q 接近
+.replace(/[ckq]/g,"k")
+
+// ph=f
+.replace(/ph/g,"f")
+
+// v/w 接近
+.replace(/v/g,"v")
+
+// 删除弱尾音
+.replace(/t$/,"")
+
+.replace(/d$/,"")
+
+.replace(/s$/,"");
+
+
+}
+
+
+let sa =
+simplify(a);
+
+let sb =
+simplify(b);
+
+
+
+let score =
+getSimilarity(
+sa,
+sb
+);
+
+
+
+return score >= 0.55;
 
 
 }
