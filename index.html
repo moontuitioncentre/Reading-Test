@@ -838,8 +838,6 @@ let isChecking = false;
 
 let finished = false;
 
-
-
 const wordDiv =
 document.getElementById("word");
 
@@ -896,8 +894,6 @@ document.body.className="normal";
 // =======================
 
 function startListening(){
-
-
 
 if(isListening){
 
@@ -1538,6 +1534,7 @@ wrongWords.length>0
 
 function restart(){
 
+userStarted = true;    
 
 words =
 shuffle([...selectedRange]);
@@ -1655,16 +1652,6 @@ return;
 
 
 }
-
-window.addEventListener(
-"beforeunload",
-function(e){
-
-e.preventDefault();
-
-e.returnValue = "";
-
-});
 
 // =======================
 // 防止刷新导致进度消失
@@ -2099,6 +2086,28 @@ restart();
 }
 
 }
+
+// =======================
+// Refresh保护
+// =======================
+
+let pageLoaded = true;
+
+
+window.addEventListener(
+"beforeunload",
+function(e){
+
+if(pageLoaded){
+
+e.preventDefault();
+
+e.returnValue="";
+
+}
+
+});
+
 
 // 初始加载
 
