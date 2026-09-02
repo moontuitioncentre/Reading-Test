@@ -963,18 +963,37 @@ answer.toLowerCase()
 let threshold = 0.65;
 
 
-if(answer.length <=4){
+// 超短词（a, an, in, on, at, we 等）
+if(answer.length <= 3){
 
-threshold = 0.55;
+    threshold = 0.45;
+
+}
+
+
+// 短词（got, milk, list, four 等）
+else if(answer.length <= 4){
+
+    threshold = 0.55;
 
 }
 
 
-if(answer.length >=9){
+// 长词保持较严格
+else if(answer.length >= 9){
 
-threshold = 0.7;
+    threshold = 0.7;
 
 }
+
+
+// 普通词
+else{
+
+    threshold = 0.65;
+
+}
+
 
 
 if(similarity >= threshold || phoneticMatch(cleanText, answer)){
