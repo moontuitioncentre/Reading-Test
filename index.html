@@ -362,10 +362,8 @@ Short Phrase
 
 
 
-<button class="restart-btn" onclick="restart()">
-
+<button class="restart-btn" onclick="confirmRestart()">
 重新开始
-
 </button>
 
 
@@ -625,7 +623,7 @@ const phrases = [
     "bake a cake",
     "eat your carrots",
     "at home",
-    "eat your peas",
+    "i like to eat peas",
     "eat the apples",
     "we are ready",
     "cook the sausages",
@@ -837,6 +835,8 @@ let isListening = false;
 let resultTimer = null;
 
 let isChecking = false;
+
+let finished = false;
 
 
 
@@ -1401,6 +1401,7 @@ return result;
 
 function showResult(){
 
+finished = true;
 
 wordDiv.innerText =
 "🎊";
@@ -1655,8 +1656,19 @@ return;
 
 }
 
+window.addEventListener(
+"beforeunload",
+function(e){
 
+e.preventDefault();
 
+e.returnValue = "";
+
+});
+
+// =======================
+// 防止刷新导致进度消失
+// =======================
 
 selectedRange =
 originalWords.slice(
@@ -2070,6 +2082,21 @@ sb
 
 return score >= 0.7;
 
+
+}
+
+function confirmRestart(){
+
+let result = confirm(
+"确定要重新开始吗？\n\n目前测试进度会全部清除。"
+);
+
+
+if(result){
+
+restart();
+
+}
 
 }
 
