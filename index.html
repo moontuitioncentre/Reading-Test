@@ -932,7 +932,7 @@ return;
 
 
 let answer =
-words[current];
+normalizeSpeech(words[current]);
 
 
 
@@ -1520,6 +1520,13 @@ text =
 text.toLowerCase()
 .trim();
 
+
+// 删除撇号 '
+text =
+text.replace(/'/g,"");
+
+
+// 删除标点符号
 text =
 text.replace(/[.,!?]/g,"");
 
@@ -1635,6 +1642,37 @@ const similarWords = {
 
 "lease":["list"],
 "list":["lease"],
+
+
+"done":["don't"],
+"don't":["done"],
+
+
+"have not":["haven't"],
+"haven't":["have not"],
+
+
+"i have":["i've"],
+"i've":["i have"],
+
+
+"do":["don't"],
+"don't":["do"],
+
+"i am":["i'm"],
+"i'm":["i am"],
+
+"what is":["what's"],
+"what's":["what is"],
+
+"they are":["they're"],
+"they're":["they are"],
+
+"we are":["we're"],
+"we're":["we are"],
+
+"you are":["you're"],
+"you're":["you are"],
 
 
 "tree":["three"],
