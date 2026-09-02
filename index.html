@@ -960,22 +960,24 @@ answer.toLowerCase()
 
 // 默认标准
 
-let threshold = 0.7;
+let threshold = 0.65;
 
 
-if(answer.length <= 4){
+if(answer.length <=4){
 
-    threshold = 0.55;
-
-}
-else if(answer.length >= 9){
-
-    threshold = 0.75;
+threshold = 0.55;
 
 }
 
 
-if(similarity >= threshold){
+if(answer.length >=9){
+
+threshold = 0.7;
+
+}
+
+
+if(similarity >= threshold || phoneticMatch(cleanText, answer)){
 
 stopListening();
 
@@ -1589,6 +1591,92 @@ return contractions[text];
 
 
 return text;
+
+}
+
+// =======================
+// 英文发音相近判断
+// =======================
+
+function phoneticMatch(a,b){
+
+
+a = a.toLowerCase();
+b = b.toLowerCase();
+
+
+// 常见语音识别错误
+
+const similarWords = {
+
+
+"god":["got"],
+"got":["god"],
+
+
+"lease":["list"],
+"list":["lease"],
+
+
+"tree":["three"],
+"three":["tree"],
+
+
+"for":["four"],
+"four":["for"],
+
+
+"too":["two"],
+"two":["too"],
+
+
+"won":["one"],
+"one":["won"],
+
+
+"ate":["eight"],
+"eight":["ate"],
+
+
+"to":["two","too"],
+"two":["to","too"],
+
+
+"see":["sea"],
+"sea":["see"],
+
+
+"be":["bee"],
+"bee":["be"],
+
+
+"right":["write"],
+"write":["right"],
+
+
+"no":["know"],
+"know":["no"],
+
+
+"here":["hear"],
+"hear":["here"]
+
+};
+
+
+
+if(
+similarWords[a] &&
+similarWords[a].includes(b)
+){
+
+return true;
+
+}
+
+
+return false;
+
 
 }
 
