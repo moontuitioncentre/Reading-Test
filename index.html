@@ -958,7 +958,22 @@ answer.toLowerCase()
 );
 
 
-if(similarity >= 0.7){
+// 默认标准
+
+let threshold = 0.7;
+
+
+// 短词降低要求
+// 例如 milk, got, and, we
+
+if(answer.length <= 4){
+
+    threshold = 0.6;
+
+}
+
+
+if(similarity >= threshold){
 
 stopListening();
 
